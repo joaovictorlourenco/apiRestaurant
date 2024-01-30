@@ -19,6 +19,40 @@ export class RestaurantService {
     return restaurant
   }
 
+  async findRestaurantByProductNameOrDescription(name: string) {
+    const restaurant = await this.prisma.restaurant.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: name,
+            },
+          },
+          {
+            product: {
+              some: {
+                OR: [
+                  {
+                    name: {
+                      contains: name,
+                    },
+                  },
+                  {
+                    description: {
+                      contains: name,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    })
+
+    return restaurant
+  }
+
   async findAll() {
     const restaurants = await this.prisma.restaurant.findMany({
       include: {
@@ -26,6 +60,18 @@ export class RestaurantService {
       },
     })
 
+    return restaurants
+  }
+
+  async findById(id: string) {
+    const restaurants = await this.prisma.restaurant.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        product: true,
+      },
+    })
     return restaurants
   }
 }
